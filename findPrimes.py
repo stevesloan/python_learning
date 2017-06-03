@@ -3,10 +3,13 @@ import sys
 
 import _thread
 import time
-
+import threading
+from queue import Queue
 
 allNumbers = []
-primes = []
+primes = [1,]
+lock = threading.Lock()
+q = Queue()
 
 def is_prime(n):
     for i in range(3, n):
@@ -14,8 +17,26 @@ def is_prime(n):
             return False
     return True
 
-def find_primes(count):
-    print(list(x for x in range(count) if is_prime(x)))
+def do_work(item):
+    print('working')
+    if(is_prime(item)):
+        with lock:
+            print(item)
+            global primes
+            primes.push(item)
+
+def worker():
+    while True:
+        item = q.get()
+        do_work(item)
+        q.task_done()
+
+def main():
+    for i in range(int(sys.argv[1])):
+        t = threading.Thread(target=worker)
+        t.daemon = True
+        t.start()
+
 
 def test():
     global allNumbers
@@ -35,5 +56,8 @@ def find_primes2(count):
 
 
 if __name__ == '__main__':
-    find_primes2(int(sys.argv[1]))
+    #find_primes2(int(sys.argv[1]))
     # print(allNumbers)
+    main()
+    print(primes)
+
