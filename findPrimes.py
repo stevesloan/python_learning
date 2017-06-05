@@ -7,7 +7,7 @@ import threading
 from queue import Queue
 
 allNumbers = []
-primes = [1,]
+primes = []
 lock = threading.Lock()
 q = Queue()
 
@@ -18,12 +18,10 @@ def is_prime(n):
     return True
 
 def do_work(item):
-    print('working')
+    global primes
     if(is_prime(item)):
         with lock:
-            print(item)
-            global primes
-            primes.push(item)
+            primes.append(item)
 
 def worker():
     while True:
@@ -32,32 +30,18 @@ def worker():
         q.task_done()
 
 def main():
-    for i in range(int(sys.argv[1])):
+    for i in range(4):
         t = threading.Thread(target=worker)
         t.daemon = True
         t.start()
 
+    for item in range(int(sys.argv[1])):
+        q.put(item)
 
-def test():
-    global allNumbers
-    global primes
-    while allNumbers.length > 1:
-        number = allNumbers.pop()
-        if(is_prime(number)):
-            primes.append(number)
-
-def find_primes2(count):
-    global allNumbers
-    allNumbers = list(range(count))
-    try:
-        _thread.start_new_thread(test)
-    except:
-        print('cant do it')
-
+    q.join()
 
 if __name__ == '__main__':
-    #find_primes2(int(sys.argv[1]))
-    # print(allNumbers)
+    start = time.perf_counter()
     main()
     print(primes)
-
+    print('time:',time.perf_counter() - start)
